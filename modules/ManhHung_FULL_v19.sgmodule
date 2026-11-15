@@ -1,0 +1,27 @@
+#!name=Locket Mạnh Hùng FULL v19 (PTB + Caption)
+#!desc=6 khung PTB, Filter UI, 239 caption va chong cache. Experimental, KHONG kick Gold.
+#!author=ManhHung
+#!system=ios
+#!arguments=PTB_KEY:SET_YOUR_KEY
+#!arguments-desc=Chi nhap khoa Worker tai Arguments Shadowrocket; khong luu secret tren GitHub.
+
+[Rule]
+AND,((DOMAIN,firebaseremoteconfig.googleapis.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
+
+[Header Rewrite]
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-none-match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-modified-since
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del x-goog-if-none-match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-none-match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-modified-since
+
+[Script]
+MH19 Anti Cache = type=http-request,pattern=^https?:\/\/(?:firebaseremoteconfig\.googleapis\.com|api\.locketcamera\.com)\/.+$,requires-body=0,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
+MH19 Firebase PTB Caption = type=http-response,pattern=^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/remote-config.js,timeout=40
+MH19 Locket Filter API = type=http-response,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/api-response.js,timeout=30
+MH19 PTB Render = type=http-request,pattern=^https?:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/generate-request.js,argument={{{PTB_KEY}}},timeout=30
+
+[MITM]
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, us-central1-locket-4252a.cloudfunctions.net
