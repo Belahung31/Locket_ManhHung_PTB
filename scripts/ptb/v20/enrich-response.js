@@ -108,7 +108,7 @@ function getJSON(url) {
 }
 (async()=>{
   const original=($response&&$response.body)||"";
-  const path=(()=>{try{return new URL($request.url).pathname;}catch(_){return "unknown";}})();
+  const path=(()=>{const m=String(($request&&$request.url)||"").split("?")[0].match(/^https?:\/\/[^/]+(\/.*)$/i);return m?m[1]:"/";})();
   try {
     if (!original) {console.log(MH+" empty response "+path);return $done({body:original});}
     // JSON inspection stays local; no auth/receipt/personally-identifying data is logged.
