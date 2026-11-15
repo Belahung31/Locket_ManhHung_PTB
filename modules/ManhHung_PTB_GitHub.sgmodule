@@ -1,0 +1,20 @@
+#!name=Locket PTB ManhHung GitHub v17
+#!desc=6 khung PTB ManhHung (experimental). Backend Cloudflare; khong kich hoat Gold.
+#!author=ManhHung
+#!system=ios
+#!arguments=PTB_KEY:SET_YOUR_KEY
+#!arguments-desc=Nhap PTB_API_KEY vao Shadowrocket, khong dang key len GitHub.
+
+[Header Rewrite]
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.* header-del if-none-match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.* header-del if-modified-since
+^https?:\/\/api\.locketcamera\.com\/getFilters.* header-del if-none-match
+^https?:\/\/api\.locketcamera\.com\/getFilters.* header-del if-modified-since
+
+[Script]
+MH PTB Firebase RC = type=http-response,pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.*$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/remote-config.js,timeout=30
+MH PTB Get Filters = type=http-response,pattern=^https:\/\/api\.locketcamera\.com\/getFilters(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/get-filters.js,timeout=30
+MH PTB Render = type=http-request,pattern=^https:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/generate-request.js,argument={{{PTB_KEY}}},timeout=30
+
+[MITM]
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, us-central1-locket-4252a.cloudfunctions.net
