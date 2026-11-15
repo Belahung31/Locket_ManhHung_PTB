@@ -1,0 +1,15 @@
+#!name=Locket PTB Mạnh Hùng v18
+#!desc=6 khung PTB + caption tu Worker. Ban thu nghiem, khong kich hoat Gold.
+#!author=ManhHung
+#!system=ios
+#!arguments=PTB_KEY:SET_YOUR_KEY
+#!arguments-desc=Nhap PTB_API_KEY da luu trong Cloudflare, khong dang len GitHub.
+
+[Script]
+MH18 Clear Filter Cache = type=http-request,pattern=^https:\/\/(?:firebaseremoteconfig\.googleapis\.com\/.+|api\.locketcamera\.com\/(?:getFilters|filters)(?:\?.*)?)$,requires-body=0,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v18/clear-cache.js,timeout=15
+MH18 Firebase Filters and Captions = type=http-response,pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v18/remote-config.js,timeout=40
+MH18 Locket API Filters = type=http-response,pattern=^https:\/\/api\.locketcamera\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v18/api-response.js,timeout=30
+MH18 Custom PTB Render = type=http-request,pattern=^https:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v18/generate-request.js,argument={{{PTB_KEY}}},timeout=30
+
+[MITM]
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, us-central1-locket-4252a.cloudfunctions.net
