@@ -1,5 +1,5 @@
-#!name=Locket Mạnh Hùng FULL v19 (PTB + Caption)
-#!desc=6 khung PTB, Filter UI, 239 caption va chong cache. Experimental, KHONG kick Gold.
+#!name=Locket Mạnh Hùng FULL v19.1 (PTB + Caption + RevenueCat)
+#!desc=PTB, Filter, Caption va RevenueCat cache + diagnostics. Khong tu kich hoat Gold.
 #!author=ManhHung
 #!system=ios
 #!arguments=PTB_KEY:SET_YOUR_KEY
@@ -11,6 +11,9 @@ AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
 AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
 
 [Header Rewrite]
+^https?:\/\/api\.revenuecat\.com\/v1\/(?:receipts|subscribers)(?:\/|\?|$) header-del if-none-match
+^https?:\/\/api\.revenuecat\.com\/v1\/(?:receipts|subscribers)(?:\/|\?|$) header-del if-modified-since
+
 ^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-none-match
 ^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-modified-since
 ^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del x-goog-if-none-match
@@ -18,10 +21,13 @@ AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
 ^https?:\/\/api\.locketcamera\.com\/.+ header-del if-modified-since
 
 [Script]
+MH19 RevenueCat Anti Cache = type=http-request,pattern=^https?:\/\/api\.revenuecat\.com\/v1\/(?:receipts|subscribers)(?:\/|\?|$),requires-body=0,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
+MH19 RevenueCat Response = type=http-response,pattern=^https?:\/\/api\.revenuecat\.com\/v1\/(?:receipts|subscribers)(?:\/|\?|$),requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/revenuecat-response.js,timeout=30
+
 MH19 Anti Cache = type=http-request,pattern=^https?:\/\/(?:firebaseremoteconfig\.googleapis\.com|api\.locketcamera\.com)\/.+$,requires-body=0,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
 MH19 Firebase PTB Caption = type=http-response,pattern=^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/remote-config.js,timeout=40
 MH19 Locket Filter API = type=http-response,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/api-response.js,timeout=30
 MH19 PTB Render = type=http-request,pattern=^https?:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/generate-request.js,argument={{{PTB_KEY}}},timeout=30
 
 [MITM]
-hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, us-central1-locket-4252a.cloudfunctions.net
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, us-central1-locket-4252a.cloudfunctions.net, api.revenuecat.com
