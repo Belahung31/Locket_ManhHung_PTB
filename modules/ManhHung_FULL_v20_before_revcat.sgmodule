@@ -1,0 +1,25 @@
+#!url=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/modules/ManhHung_FULL_v20.sgmodule
+#!name=Locket Mạnh Hùng FULL v20 - PTB & Caption
+#!desc=6 PTB, 239 caption, Firebase, RevenueCat anti-cache & diagnostics. Gold that required separately.
+#!author=ManhHung
+#!system=ios
+#!arguments=PTB_KEY:SET_YOUR_KEY
+#!arguments-desc=Nhap khoa Worker trong Arguments tren iPhone. KHONG dua khoa len GitHub.
+
+[Rule]
+AND,((DOMAIN,firebaseremoteconfig.googleapis.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.revenuecat.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
+
+[Script]
+MH20 Clear Firebase Cache = type=http-request,pattern=^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+$,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
+MH20 Clear RevenueCat Cache = type=http-request,pattern=^https?:\/\/api\.revenuecat\.com\/.+\/(?:receipts|subscribers)(?:\/|\?|$),script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
+MH20 Clear Locket Cache = type=http-request,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/clear-cache.js,timeout=20
+MH20 Firebase Remote Config = type=http-response,pattern=^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/enrich-response.js,timeout=45
+MH20 Locket API Response = type=http-response,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/enrich-response.js,timeout=45
+MH20 RevenueCat Observer = type=http-response,pattern=^https?:\/\/api\.revenuecat\.com\/.+\/(?:receipts(?:\?.*)?$|subscribers\/[^/?]+(?:\?.*)?$),requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v19/revenuecat-response.js,timeout=25
+MH20 Generate Own PTB = type=http-request,pattern=^https?:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/generate-request.js,argument={{{PTB_KEY}}},timeout=40
+
+[MITM]
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, api.revenuecat.com, us-central1-locket-4252a.cloudfunctions.net
