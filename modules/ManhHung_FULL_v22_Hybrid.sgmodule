@@ -1,6 +1,6 @@
 #!url=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/modules/ManhHung_FULL_v22_Hybrid.sgmodule
-#!name=Locket Mạnh Hùng FULL v22 Hybrid
-#!desc=Giu Rule + URL Rewrite + Header Rewrite da cung cap; dung script PTB/Caption/RC Manh Hung v21.1; khong gia lap Gold.
+#!name=Locket Mạnh Hùng FULL v22.1 Hybrid - Worker riêng
+#!desc=Rule/Header Rewrite giu nguyen; URL Rewrite ve Worker Manh Hung; PTB/Caption/RC v21.1. Khong gia lap Gold.
 #!author=ManhHung
 #!system=ios
 #!arguments=PTB_KEY:SET_YOUR_KEY,PTB:true,Caption:true,RevenueCat:true,Debug:false
@@ -20,7 +20,7 @@ DOMAIN-SUFFIX,ingest.sentry.io,REJECT
 
 
 [URL Rewrite]
-^https?:\/\/(us-central1-locket-4252a\.cloudfunctions\.net|api\.locketcamera\.com)\/generateFilteredImage https://locket-pro-backend.onrender.com/generateFilteredImage?token=BASIC-DA9E23 307
+^https?:\/\/(us-central1-locket-4252a\.cloudfunctions\.net|api\.locketcamera\.com)\/generateFilteredImage https://locket-ptb-manhhung.mhung31122007.workers.dev/generateFilteredImage 307
 
 [Header Rewrite]
 ^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del x-revenuecat-etag
