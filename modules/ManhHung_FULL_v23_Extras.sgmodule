@@ -1,0 +1,67 @@
+#!url=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/modules/ManhHung_FULL_v23_Extras.sgmodule
+#!name=Locket Mạnh Hùng FULL v23 Extras - PTB Caption RC YouTube
+#!desc=Giu 6 PTB/Caption/Worker, RC Debug Gold, tuy chon an Shorts/Upload va Spotify/Profile Debug. Khong gia lap Premium.
+#!author=ManhHung
+#!system=ios
+#!arguments=PTB_KEY:SET_YOUR_KEY,PTB:true,Caption:true,RevenueCat:true,HideShorts:false,HideUpload:false,ProfileDebug:false,SpotifyDebug:false,Debug:false
+#!arguments-desc=- PTB_KEY: Khoa Worker rieng, KHONG chia se\n- PTB/Caption: Bat/tat khung/caption [true,false]\n- RevenueCat: Chong cache va kiem tra trang thai [true,false]\n- HideShorts: An Shorts khoi JSON feed YouTube [true,false]\n- HideUpload: An nut Upload neu API co renderer ho tro [true,false]\n- ProfileDebug: Log Profile/Filter khi Debug=true [true,false]\n- SpotifyDebug: Log trang thai Spotify khi Debug=true [true,false]\n- Debug: Nhat ky [true,false]
+
+[Rule]
+AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT
+AND,((DOMAIN,firebaseremoteconfig.googleapis.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.revenuecat.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,api.locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN-SUFFIX,locketcamera.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,us-central1-locket-4252a.cloudfunctions.net),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN-SUFFIX,spotify.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN-SUFFIX,spclient.wg.spotify.com),(PROTOCOL,UDP)),REJECT
+DOMAIN-SUFFIX,sentry.io,REJECT
+DOMAIN-SUFFIX,ingest.sentry.io,REJECT
+
+
+[URL Rewrite]
+# Legacy 307 disabled: cannot add X-PTB-Key and would redirect all native filters.
+# ^https?:\/\/(us-central1-locket-4252a\.cloudfunctions\.net|api\.locketcamera\.com)\/generateFilteredImage https://locket-ptb-manhhung.mhung31122007.workers.dev/generateFilteredImage 307
+# MH21 Generate Own PTB in [Script] handles only six custom filter IDs, with X-PTB-Key.
+
+[Header Rewrite]
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del x-revenuecat-etag
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del X-RevenueCat-ETag
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del if-none-match
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del If-None-Match
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del if-modified-since
+^https?:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers) header-del If-Modified-Since
+
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-none-match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del If-None-Match
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del if-modified-since
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del If-Modified-Since
+^https?:\/\/firebaseremoteconfig\.googleapis\.com\/.+ header-del x-goog-if-none-match
+
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-none-match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del If-None-Match
+^https?:\/\/api\.locketcamera\.com\/.+ header-del if-modified-since
+^https?:\/\/api\.locketcamera\.com\/.+ header-del If-Modified-Since
+
+^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(?::443)?)\/(user-customization-service\/v1\/customize|bootstrap\/v1\/bootstrap) header-del if-none-match
+^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(?::443)?)\/(user-customization-service\/v1\/customize|bootstrap\/v1\/bootstrap) header-del If-None-Match
+^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(?::443)?)\/(user-customization-service\/v1\/customize|bootstrap\/v1\/bootstrap) header-del if-modified-since
+^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(?::443)?)\/(user-customization-service\/v1\/customize|bootstrap\/v1\/bootstrap) header-del If-Modified-Since
+
+[Script]
+MH21 Clear Firebase Cache = type=http-request,pattern=^https?:\/\/firebaseremoteconfig(?:realtime)?\.googleapis\.com\/.+$,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/cache-with-options.js,argument=PTB={{{PTB}}}&Caption={{{Caption}}}&RevenueCat={{{RevenueCat}}}&Debug={{{Debug}}},timeout=20
+MH21.1 RC Anti Cache = type=http-request,pattern=^https?:\/\/(?:api|rc-backup)\.revenuecat\.com\/v1\/(?:receipts(?:\?.*)?|subscribers(?:\/[^/?#]+)?(?:\?.*)?)$,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v21/revenuecat-request.js,argument=RevenueCat={{{RevenueCat}}}&Debug={{{Debug}}},timeout=30
+MH21 Clear Locket Cache = type=http-request,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/cache-with-options.js,argument=PTB={{{PTB}}}&Caption={{{Caption}}}&RevenueCat={{{RevenueCat}}}&Debug={{{Debug}}},timeout=20
+MH21 Firebase PTB Caption = type=http-response,pattern=^https?:\/\/firebaseremoteconfig(?:realtime)?\.googleapis\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v21/enrich-response.js,argument=PTB={{{PTB}}}&Caption={{{Caption}}}&Debug={{{Debug}}},timeout=45
+MH21 Locket PTB Filter = type=http-response,pattern=^https?:\/\/api\.locketcamera\.com\/.+$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v21/enrich-response.js,argument=PTB={{{PTB}}}&Caption={{{Caption}}}&Debug={{{Debug}}},timeout=45
+MH21 Cloud Filter = type=http-response,pattern=^https?:\/\/us-central1-locket-4252a\.cloudfunctions\.net\/(?:getFilters|v1\/filters|api\/filter)(?:\/|\?|$).*$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v21/enrich-response.js,argument=PTB={{{PTB}}}&Caption={{{Caption}}}&Debug={{{Debug}}},timeout=45
+MH23 RC Gold Status = type=http-response,pattern=^https?:\/\/(?:api|rc-backup)\.revenuecat\.com\/v1\/(?:receipts(?:\?.*)?|subscribers(?:\/[^/?#]+)?(?:\?.*)?)$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v23/revenuecat-observer.js,argument=RevenueCat={{{RevenueCat}}}&Debug={{{Debug}}},timeout=30
+MH21 Generate Own PTB = type=http-request,pattern=^https?:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/generateFilteredImage(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v20/render-with-options.js,argument=PTB_KEY={{{PTB_KEY}}}&PTB={{{PTB}}}&Debug={{{Debug}}},timeout=40
+
+
+MH23 YouTube UI = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(?:browse|next|search|guide)(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v23/youtube-ui-response.js,argument=HideShorts={{{HideShorts}}}&HideUpload={{{HideUpload}}}&Debug={{{Debug}}},timeout=25
+MH23 Profile Filter Diagnostics = type=http-response,pattern=^https?:\/\/(?:api\.locketcamera\.com|us-central1-locket-4252a\.cloudfunctions\.net)\/(?:changeProfileInfo|getFilters)(?:\?.*)?$,requires-body=1,max-size=-1,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v23/profile-filter-observer.js,argument=ProfileDebug={{{ProfileDebug}}}&Debug={{{Debug}}},timeout=15
+MH23 Spotify Status = type=http-response,pattern=^https:\/\/(?:spclient\.wg\.spotify\.com|[^/]+-spclient\.spotify\.com(?::443)?)\/(?:bootstrap\/v1\/bootstrap|user-customization-service\/v1\/customize)(?:\?.*)?$,requires-body=0,script-path=https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/scripts/ptb/v23/spotify-observer.js,argument=SpotifyDebug={{{SpotifyDebug}}}&Debug={{{Debug}}},timeout=15
+
+[MITM]
+hostname = %APPEND% api.locketcamera.com, firebaseremoteconfig.googleapis.com, firebaseremoteconfigrealtime.googleapis.com, api.revenuecat.com, rc-backup.revenuecat.com, us-central1-locket-4252a.cloudfunctions.net, spclient.wg.spotify.com, *.spotify.com, youtubei.googleapis.com
