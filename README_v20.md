@@ -1,42 +1,48 @@
-# Mạnh Hùng FULL v20 — Locket PTB + Caption
+# Mạnh Hùng FULL v20.2 — Module Shadowrocket có Arguments
 
-**Bản thử nghiệm, chưa xác minh có hiển thị bộ lọc bên trong Locket trên iPhone.**
-
-## Cài
-
-Module:
+Cài module:
 `https://raw.githubusercontent.com/Belahung31/Locket_ManhHung_PTB/main/modules/ManhHung_FULL_v20.sgmodule`
 
-1. Trên Cloudflare giữ nguyên Worker v17.0 đang hoạt động (không cần thay code nếu `/ptb/check`, `/ptb/catalog`, `/locket/patch` hoạt động).
-2. R2 `FRAMES` cần 6 ảnh `frame_1.png` tới `frame_6.png`.
-3. Trong Shadowrocket tắt v17/v18/v19 và module MinhHiep08 nếu cùng chỉnh Locket để tránh tranh chấp response.
-4. Cài URL Raw v20 ở trên. Trong **Arguments** điền secret Worker vào `PTB_KEY`; không chèn khóa vào GitHub.
-5. Bật VPN, HTTPS Decryption và tin cậy đúng chứng chỉ Shadowrocket. Đóng hẳn Locket, mở lại.
-6. Kiểm tra Camera/Filter và Caption. Tìm `[MH20]`, `[MH20-RENDER]`, `[MH19-CACHE]`, `[MH19-RC]` trong log script.
+## Chỉnh tham số giống MinhHiep08
 
-## Kỹ thuật
+Trong Shadowrocket: **Cấu hình / Config → Module → chọn Mạnh Hùng FULL v20.2 → Chỉnh tham số / Edit Arguments**.
 
-- `scripts/ptb/v20/enrich-response.js` chèn filter và caption vào JSON có cấu trúc tương thích (object/JSON-string) và kiểm tra khóa giao diện có sẵn. Giữ nguyên dữ liệu hiện có, không chèn trùng lặp.
-- `scripts/ptb/v20/generate-request.js` chỉ đổi đích cho 6 filter riêng Mạnh Hùng; loại bỏ header đăng nhập/cookie trước khi gửi cho Worker.
-- Module dùng `scripts/ptb/v19/clear-cache.js` để xóa ETag / conditional cache, và `scripts/ptb/v19/revenuecat-response.js` để quan sát trạng thái RevenueCat **không sửa quyền thuê bao**.
-- **Không sao chép quy tắc 307 của MinhHiep08**: Worker Mạnh Hùng yêu cầu header secret `X-PTB-Key`, URL rewrite 307 thuần không thể tự sinh header này. Vì vậy module dùng request script cục bộ.
-- Worker / API chứa khung và caption; **không thể tự tạo nút Filter trong Locket nếu app không hỗ trợ schema**.
-- Script khác của MinhHiep08 đã làm rối (obfuscated); đây là bản viết độc lập, không tuyên bố đã giải mã logic bên đó.
-- Không kích hoạt Gold thật, Spotify Premium hay YouTube Premium.
+```ini
+#!arguments=PTB_KEY:SET_YOUR_KEY,PTB:true,Caption:true,RevenueCat:true,Debug:false
+#!arguments-desc=- PTB_KEY: Khoa Worker, chi nhap tren iPhone\n- PTB: Bat/tat 6 khung PTB [true, false]\n- Caption: Bat/tat 239 caption [true, false]\n- RevenueCat: Bat/tat chong cache va kiem tra response [true, false]\n- Debug: Bat/tat nhat ky script [true, false]
+```
 
-## Tự kiểm tra tại repo
+- **PTB** = false: không chèn 6 filter Mạnh Hùng, không chuyển generateFilteredImage về Worker.
+- **Caption** = false: không chèn caption mới từ Worker.
+- **RevenueCat** = false: không xóa ETag hoặc chạy phân tích phản hồi thuê bao qua script RevenueCat.
+- **Debug** = true: bật log [MH20.2], không ghi thông tin tài khoản hoặc token.
+- **PTB_KEY**: chỉ nhập khóa trong Arguments trên điện thoại; không commit secret lên GitHub.
 
-Đã test giả lập script v20:
-- JSON `entries.camera_filter_config` kiểu object: thêm filter, nhóm và caption, giữ nguyên filter gốc.
-- JSON string encoded `camera_filter_config`: thêm filter và caption đúng, không trùng khi chạy lại.
-- Locket `getFilters` trả về array: bổ sung filter.
-- Response không liên quan: giữ nguyên thuê bao.
-- Render request không thuộc 6 filter: giữ nguyên request. Request thuộc 6 filter: đổi sang Worker và xóa Authorization/Cookie.
-- Đã xác minh file GitHub hiện diện. **Chưa kiểm thử trong ứng dụng Locket và Cloudflare Images live.**
+Để bật: sửa biến tương ứng từ `false` sang `true`; không cần sửa mã JavaScript.
 
-## Chẩn đoán
+Các script được tham chiếu trong module:
+- `scripts/ptb/v20/response-with-options.js`
+- `scripts/ptb/v20/render-with-options.js`
+- `scripts/ptb/v20/cache-with-options.js`
+- `scripts/ptb/v20/revenuecat-request-with-options.js`
+- `scripts/ptb/v20/revenuecat-response-with-options.js`
 
-- Log `[MH20] response /... modified-records=0`: script chạy nhưng response không khớp hoặc đã có sẵn dữ liệu.
-- Không có log `[MH20]`: module chưa khớp endpoint, chưa bật hoặc decryption chưa áp dụng.
-- Có log thêm dữ liệu nhưng không có nút Filter: cần xác định schema hoặc khả năng hỗ trợ của phiên bản Locket.
-- Lỗi 401 khi tạo ảnh: kiểm tra `PTB_KEY` riêng trong Shadowrocket; tuyệt đối không gửi token vào chat.
+## Cài đặt
+
+1. Tắt module Mạnh Hùng cũ và module khác cũng can thiệp Locket để tránh ghi đè response.
+2. Thêm link Raw module v20.2 (ở đầu file), bật module và HTTPS Decryption trên thiết bị được phép kiểm thử.
+3. Chỉnh Arguments; nhập PTB_KEY hợp lệ, giữ bí mật.
+4. Đóng hẳn Locket rồi mở lại; nếu không thấy PTB, bật Debug=true và xem log [MH20.2].
+
+## Đã kiểm tra
+
+Kiểm tra script với dữ liệu giả lập:
+- Bật cả PTB và Caption: thêm đúng dữ liệu, giữ nguyên dữ liệu cũ.
+- PTB=false: không thêm filter, caption vẫn hoạt động.
+- Caption=false: không thêm caption, filter vẫn hoạt động.
+- PTB=false & Caption=false: không gọi Worker.
+- Debug=false: không in nhật ký; Debug=true: có nhật ký.
+- RevenueCat=false: không sửa header; RevenueCat=true: xóa cache validators nhưng giữ Authorization.
+- Render khi PTB=false: không chuyển request, PTB=true: chuyển 6 ID riêng và xóa Authorization/Cookie.
+
+**Giới hạn**: Các thử nghiệm trên dùng JSON giả lập, KHÔNG chứng minh rằng Locket trên iPhone có hỗ trợ giao diện Filter/Caption hoặc Worker ghép ảnh đã hoạt động end-to-end. Đây không phải kích hoạt Gold hoặc giả lập thuê bao. RevenueCat chỉ được dùng để quan sát thông tin thuê bao sẵn có và tránh cache.
