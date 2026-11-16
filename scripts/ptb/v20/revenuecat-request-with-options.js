@@ -1,17 +1,31 @@
-// ManhHung FULL v20.2 - RevenueCat conditional anti-304. No subscription edits.
-const flags={RevenueCat:"true",Debug:"false"};
-for(const item of String(typeof $argument==="string"?$argument:"").split("&")){
- const p=item.indexOf("=");
- if(p>0&&Object.prototype.hasOwnProperty.call(flags,item.slice(0,p)))flags[item.slice(0,p)]=item.slice(p+1).toLowerCase();
-}
-try{
- if(flags.RevenueCat==="false"){$done({});}
- else{
-  const h=Object.assign({},$request.headers||{});let changed=false;
-  for(const key of Object.keys(h)){
-   if(/^(x-revenuecat-etag|if-none-match|if-modified-since)$/i.test(key)){delete h[key];changed=true;}
+// ManhHung FULL v20.3 - RevenueCat anti-cache aligned with NMS header7.js.
+// This only clears cache validators; it NEVER changes purchase/subscription data.
+(function () {
+  const flags={RevenueCat:"true",Debug:"false"};
+  for(const item of String(typeof $argument==="string"?$argument:"").split("&")) {
+    const i=item.indexOf("=");
+    if(i>0 && Object.prototype.hasOwnProperty.call(flags,item.slice(0,i)))
+      flags[item.slice(0,i)]=item.slice(i+1).toLowerCase();
   }
-  if(changed&&flags.Debug==="true")console.log("[MH20.2-RC] cache validators removed");
-  $done(changed?{headers:h}:{});
- }
-}catch(err){$done({});}
+  try {
+    if(flags.RevenueCat==="false")return $done({});
+    const headers=Object.assign({},$request.headers||{});
+    let changed=false;
+    let foundETag=false;
+    for(const key of Object.keys(headers)) {
+      const k=key.toLowerCase();
+      if(k==="x-revenuecat-etag") {
+        foundETag=true;
+        if(headers[key]!==""){headers[key]="";changed=true;}
+      } else if(k==="if-none-match"||k==="if-modified-since") {
+        delete headers[key];changed=true;
+      }
+    }
+    if(!foundETag){headers["X-RevenueCat-ETag"]="";changed=true;}
+    if(changed && flags.Debug==="true")console.log("[MH20.3-RC] cache headers normalized");
+    $done(changed ? {headers} : {});
+  } catch(e) {
+    if(flags.Debug==="true")console.log("[MH20.3-RC] unchanged due to request error");
+    $done({});
+  }
+})();
