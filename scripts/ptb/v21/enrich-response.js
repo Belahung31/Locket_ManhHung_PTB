@@ -124,13 +124,13 @@ function patchGetFilters(body,patch) {
   const c=patch.camera_filter_config,items=list(c.filters).length?c.filters:list(c.remoteFilters);
   const ids=list(c.picker_filters).length?c.picker_filters:items.map(id);
   let n=0;
-  if(Array.isArray(body))return mergeArray(body,typeof body.find(x=>x!=null)==="string"?ids:items);
+  if(Array.isArray(body))return mergeArray(body,(body.find(x=>x!=null)===undefined||typeof body.find(x=>x!=null)==="string")?ids:items);
   const targets=[body,body&&body.data,body&&body.result,body&&body.result&&body.result.data,
      body&&body.payload,body&&body.payload&&body.payload.data];
   for(const node of targets){
     if(!object(node)||!Array.isArray(node.filters))continue;
     const first=node.filters.find(x=>x!=null);
-    n+=mergeArray(node.filters,typeof first==="string"?ids:items);
+    n+=mergeArray(node.filters,(first===undefined||typeof first==="string")?ids:items);
   }
   return n;
 }
