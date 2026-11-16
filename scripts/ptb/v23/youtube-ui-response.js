@@ -17,6 +17,14 @@
     const isShorts=x=>{
       if(!isObj(x))return false;
       if(x.reelShelfRenderer||x.reelItemRenderer||x.shortsLockupViewModel||x.shortsLockupViewModelHost||x.shortsFeedItemRenderer)return true;
+      // Common wrapped objects from browse/next home feeds.
+      const rich=x.richItemRenderer&&x.richItemRenderer.content;
+      if(isObj(rich)&&(rich.reelItemRenderer||rich.shortsLockupViewModel))return true;
+      const sec=x.richSectionRenderer&&x.richSectionRenderer.content;
+      if(isObj(sec)&&isObj(sec.richShelfRenderer)){
+        const t=sec.richShelfRenderer.title||{};
+        if(t.simpleText==="Shorts"||Array.isArray(t.runs)&&t.runs.some(y=>y&&y.text==="Shorts"))return true;
+      }
       const p=x.pivotBarItemRenderer;
       if(isObj(p)){
         const endpoint=p.navigationEndpoint||p.onTap||{};
